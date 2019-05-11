@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 28
@@ -30,4 +32,22 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    implementation "androidx.core:core-ktx:1.0.2"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    /**数据库*/
+    def jet_pack = '1.1.1'
+    implementation "android.arch.persistence.room:runtime:$jet_pack"
+    annotationProcessor "android.arch.persistence.room:compiler:$jet_pack"
+    /**网络请求库*/
+    implementation 'com.squareup.okhttp3:okhttp:3.14.1'
+    /**Anko*/
+    implementation "org.jetbrains.anko:anko-commons:0.10.5"
+    /**Json解析*/
+    def jackson = '2.9.8'
+    implementation "com.fasterxml.jackson.core:jackson-core:$jackson"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jackson"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:$jackson"
+}
+repositories {
+    mavenCentral()
 }
