@@ -47,6 +47,9 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-core:$jackson"
     implementation "com.fasterxml.jackson.core:jackson-databind:$jackson"
     implementation "com.fasterxml.jackson.core:jackson-annotations:$jackson"
+    /**列表视图*/
+    implementation "com.android.support:recyclerview-v7:28.0.2"
+
 }
 repositories {
     mavenCentral()
