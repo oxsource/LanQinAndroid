@@ -1,10 +1,10 @@
 package pizzk.android.lanqin.api
 
-object LanQinApi {
+internal object LanQinApi {
     const val UPLOAD_LOG: String = "/app/log"
 }
 
-data class LanQinHttpResult(
+internal data class LanQinHttpResult(
     var code: Int = 0,
     var msg: String = ""
 ) {

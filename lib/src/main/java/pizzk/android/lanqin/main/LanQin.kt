@@ -32,51 +32,52 @@ object LanQin {
     fun init(context: Application, cfg: Config) {
         app = context
         config = cfg
-        doAsync { db = LanQinDatabase.create(context) }
+        db = LanQinDatabase.create(context)
     }
 
     fun config() = config
 
     fun app() = app
 
-    fun db(): LanQinDatabase? = db
-
     /**
      * 存储及上送日志
      */
-    fun log(entity: LanQinEntity) {
+    fun upload(entity: LanQinEntity): Boolean {
         try {
-            val logId: Int = LocalRepos.save(listOf(entity))
-            val flag: Boolean = CloudRepos.save(listOf(entity)) > 0
-            if (!flag) return
-            val dao: LogDao = db()?.log() ?: return
-            val item: LogTextEntity = dao.query(logId) ?: return
-            item.setSynced(LogTextEntity.SYNCED_CODE)
-            dao.update(item)
+            if (CloudRepos.save(listOf(entity)) > 0) return true
+            if (LocalRepos.save(listOf(entity), db) > 0) return true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return false
+    }
+
+    /**
+     * 上送未同步的日志
+     */
+    fun uploads() {
+        try {
+            val dao: LogDao = db.log()
+            val logs: List<LogTextEntity> = dao.queryAll(page = 0, size = 5)
+            if (logs.isEmpty()) return
+            val entities: List<LanQinEntity> = logs.map { log ->
+                val json: String = log.content
+                return@map JsonFormat.parse<LanQinEntity>(json)
+            }.filterNotNull()
+            if (CloudRepos.save(entities) <= 0) return
+            dao.deleteAll(logs)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     /**
-     * 上送未同步的日志
+     * 查询本地未上送日志
      */
-    fun logs() {
-        try {
-            val dao: LogDao = db()?.log() ?: return
-            val syncs: Array<Int> = arrayOf(LogTextEntity.NOT_SYNC_CODE)
-            val logs: List<LogTextEntity> = dao.query(page = 0, size = 5, syncs = syncs)
-            if (logs.isEmpty()) return
-            val entities: List<LanQinEntity> = logs.map { log ->
-                val json: String = log.content
-                return@map JsonFormat.parse<LanQinEntity>(json)
-            }.filterNotNull()
-            val flag: Boolean = CloudRepos.save(entities) > 0
-            if (!flag) return
-            logs.forEach { e -> e.setSynced(LogTextEntity.SYNCED_CODE) }
-            dao.updateAll(logs)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+    fun localLogs(page: Int, size: Int): List<LogTextEntity> = try {
+        db.log().queryAll(page, size)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        emptyList()
     }
 }

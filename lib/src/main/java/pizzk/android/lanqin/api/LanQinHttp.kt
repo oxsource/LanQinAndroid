@@ -6,7 +6,7 @@ import pizzk.android.lanqin.main.LanQin
 import java.util.concurrent.TimeUnit
 
 /**蓝芩Http客户端*/
-object LanQinHttp {
+internal object LanQinHttp {
     /**超时设置*/
     private const val READ_TS = 5L
     private const val WRITE_TS = 15L

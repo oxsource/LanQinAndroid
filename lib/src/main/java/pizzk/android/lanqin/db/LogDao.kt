@@ -3,24 +3,18 @@ package pizzk.android.lanqin.db
 import androidx.room.*
 
 @Dao
-interface LogDao {
+internal interface LogDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(log: LogTextEntity): Int
+    fun insert(log: LogTextEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(logs: List<LogTextEntity>): List<Int>
+    fun insertAll(logs: List<LogTextEntity>): List<Long>
 
-    @Query("SELECT * FROM `${LogTextEntity.TABLE}` WHERE id = :id")
+    @Query("SELECT * FROM `log-text` WHERE id = :id")
     fun query(id: Int): LogTextEntity?
 
-    @Query("SELECT * FROM `${LogTextEntity.TABLE}` WHERE sync in (:syncs) LIMIT :size OFFSET :page*:size")
-    fun query(page: Int, size: Int, syncs: Array<Int>): List<LogTextEntity>
-
-    @Update
-    fun update(log: LogTextEntity): Int
-
-    @Update
-    fun updateAll(logs: List<LogTextEntity>): Int
+    @Query("SELECT * FROM `log-text` LIMIT :size OFFSET :page*:size")
+    fun queryAll(page: Int, size: Int): List<LogTextEntity>
 
     @Delete
     fun delete(log: LogTextEntity): Int

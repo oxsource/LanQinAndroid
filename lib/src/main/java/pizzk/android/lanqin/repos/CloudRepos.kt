@@ -10,9 +10,9 @@ import pizzk.android.lanqin.main.JsonFormat
 import java.lang.Exception
 
 /**云存储仓库*/
-object CloudRepos : LanQinRepos() {
+internal object CloudRepos {
 
-    override fun save(entities: List<LanQinEntity>): Int {
+    fun save(entities: List<LanQinEntity>): Int {
         return try {
             val json: String = JsonFormat.json(entities)
             val call: Call = LanQinHttp.post(LanQinApi.UPLOAD_LOG, json)
