@@ -1,8 +1,8 @@
-package pizzk.android.lanqin.main
+package pizzk.android.lanqin.utils
 
 import com.fasterxml.jackson.databind.ObjectMapper
 
-internal object JsonFormat {
+internal object JsonUtils {
     fun json(obj: Any?): String {
         return try {
             val mapper = ObjectMapper()

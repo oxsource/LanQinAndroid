@@ -1,14 +1,14 @@
 package pizzk.android.lanqin.api
 
 import okhttp3.*
-import pizzk.android.lanqin.main.JsonFormat
-import pizzk.android.lanqin.main.LanQin
+import pizzk.android.lanqin.utils.JsonUtils
+import pizzk.android.lanqin.LanQin
 import java.util.concurrent.TimeUnit
 
 /**蓝芩Http客户端*/
 internal object LanQinHttp {
     /**超时设置*/
-    private const val READ_TS = 5L
+    private const val READ_TS = 15L
     private const val WRITE_TS = 15L
     private const val CONN_TS = 15L
     /**JSON媒体类型*/
@@ -35,6 +35,6 @@ internal object LanQinHttp {
         val rsp: Response = response ?: return result
         if (!rsp.isSuccessful) return result
         val json: String = rsp.body()?.string() ?: ""
-        return JsonFormat.parse<LanQinHttpResult>(json) ?: result
+        return JsonUtils.parse<LanQinHttpResult>(json) ?: result
     }
 }

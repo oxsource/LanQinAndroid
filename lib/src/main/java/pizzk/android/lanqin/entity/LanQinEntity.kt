@@ -1,7 +1,10 @@
 package pizzk.android.lanqin.entity
 
 import android.app.Application
-import pizzk.android.lanqin.main.LanQin
+import pizzk.android.lanqin.LanQin
+import java.io.PrintWriter
+import java.io.StringWriter
+import java.lang.Exception
 import java.util.*
 
 /**
@@ -58,7 +61,9 @@ data class LanQinEntity(
     var userAccount: String = "",
     var lastLoginTime: String = "",
     /**日志级别：普通-0，调试-1，错误-2，奔溃-3*/
-    var level: Int = LEVEL_NORMAL
+    var level: Int = LEVEL_NORMAL,
+    /**SHA唯一标记，防止重复提交*/
+    var hash: String = ""
 ) {
 
     init {
@@ -86,5 +91,12 @@ data class LanQinEntity(
         const val LEVEL_DEBUG = 1
         const val LEVEL_ERROR = 2
         const val LEVEL_CRASH = 3
+
+        fun stackTrace(e: Exception): String {
+            val sw = StringWriter()
+            val pw = PrintWriter(sw)
+            e.printStackTrace(pw)
+            return sw.toString()
+        }
     }
 }
