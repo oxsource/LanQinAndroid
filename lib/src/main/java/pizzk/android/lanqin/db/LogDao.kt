@@ -1,6 +1,6 @@
 package pizzk.android.lanqin.db
 
-import androidx.room.*
+import android.arch.persistence.room.*
 
 @Dao
 internal interface LogDao {

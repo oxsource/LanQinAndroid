@@ -18,13 +18,13 @@ import java.util.*
  */
 object LanQin {
     data class Config(
-        val appId: String,
-        val channel: String,
-        /**上送服务器地址，不合规的地址将不进行上送*/
-        val host: String,
-        /**最大缓存时间*/
-        val expireDays: Int,
-        var debug: Boolean = true
+            val appId: String,
+            val channel: String,
+            /**上送服务器地址，不合规的地址将不进行上送*/
+            val host: String,
+            /**最大缓存时间*/
+            val expireDays: Int,
+            var debug: Boolean = true
     )
 
     private lateinit var config: Config

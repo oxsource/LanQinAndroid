@@ -1,14 +1,13 @@
 package pizzk.android.lanqin.app
 
-import androidx.appcompat.app.AppCompatActivity
+import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
-import pizzk.android.lanqin.entity.LanQinEntity
 import pizzk.android.lanqin.LanQin
-import java.lang.IllegalArgumentException
+import pizzk.android.lanqin.entity.LanQinEntity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var tvContent: TextView
