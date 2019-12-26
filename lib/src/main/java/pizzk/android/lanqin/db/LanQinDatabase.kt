@@ -13,10 +13,9 @@ internal abstract class LanQinDatabase : RoomDatabase() {
 
     companion object {
         fun create(app: Application): LanQinDatabase {
-            return Room.databaseBuilder(
-                app,
-                LanQinDatabase::class.java, "LanQin-DB"
-            ).build()
+            val name = "LanQin-DB"
+            val clazz = LanQinDatabase::class.java
+            return Room.databaseBuilder(app, clazz, name).build()
         }
     }
 }

@@ -18,13 +18,13 @@ import java.util.*
  */
 object LanQin {
     data class Config(
-            val appId: String,
-            val channel: String,
-            /**上送服务器地址，不合规的地址将不进行上送*/
-            val host: String,
-            /**最大缓存时间*/
-            val expireDays: Int,
-            var debug: Boolean = true
+        val appId: String,
+        val channel: String,
+        /**上送服务器地址，不合规的地址将不进行上送*/
+        val host: String,
+        /**最大缓存时间*/
+        val expireDays: Int,
+        var debug: Boolean = true
     )
 
     private lateinit var config: Config
@@ -47,18 +47,21 @@ object LanQin {
     /**
      * 存储及上送日志
      */
-    fun upload(entity: LanQinEntity): Boolean {
+    fun upload(vararg entity: LanQinEntity): Boolean {
         try {
-            val logs = listOf(entity).map { e ->
+            val es: List<LanQinEntity> = entity.toList()
+            val logs: List<LogTextEntity> = es.map { e: LanQinEntity ->
                 val log = LogTextEntity()
-                val content = JsonUtils.json(e)
+                val content: String = JsonUtils.json(e)
                 e.hash = HashUtils.sha(content)
                 log.content = JsonUtils.json(e)
                 log.time = e.happenTime
                 return@map log
             }
-            if (CloudRepos.save(listOf(entity)) > 0) return true
-            if (LocalRepos.save(logs, db) > 0) return true
+
+            val saved: Boolean = LocalRepos.save(logs, db) > 0
+            if (CloudRepos.save(es) <= 0) return false
+            if (saved) db.log().deleteAll(logs)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -73,14 +76,16 @@ object LanQin {
             val dao: LogDao = db.log()
             val logs: List<LogTextEntity> = dao.queryAll(page = 0, size = 5)
             if (logs.isEmpty()) return
-            val currentMills = Date().time
-            val maxExpire = 7 * 24 * 60 * 60
+            val currentMills: Long = Date().time
+            val maxExpire: Int = config.expireDays * 24 * 60 * 60
             //移除过期日志
-            val expireOuts = logs.filter { log -> currentMills - log.time >= maxExpire }
+            val expireOuts: List<LogTextEntity> =
+                logs.filter { log: LogTextEntity -> currentMills - log.time >= maxExpire }
             dao.insertAll(expireOuts)
             //上送日志
-            val expireIns = logs.filter { log -> currentMills - log.time < maxExpire }
-            val entities: List<LanQinEntity> = expireIns.map { log ->
+            val expireIns: List<LogTextEntity> =
+                logs.filter { log: LogTextEntity -> currentMills - log.time < maxExpire }
+            val entities: List<LanQinEntity> = expireIns.map { log: LogTextEntity ->
                 val json: String = log.content
                 return@map JsonUtils.parse<LanQinEntity>(json)
             }.filterNotNull()
@@ -94,11 +99,11 @@ object LanQin {
     /**
      * 查询本地未上送日志
      */
-    fun logs(page: Int, size: Int): List<LogTextEntity> = try {
+    fun logs(page: Int, size: Int): List<LogTextEntity>? = try {
         db.log().queryAll(page, size)
     } catch (e: Exception) {
         e.printStackTrace()
-        emptyList()
+        null
     }
 
     /**
