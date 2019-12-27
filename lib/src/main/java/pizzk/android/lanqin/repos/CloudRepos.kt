@@ -13,6 +13,7 @@ import java.lang.Exception
 internal object CloudRepos {
 
     fun save(entities: List<LanQinEntity>): Int {
+        if (entities.isEmpty()) return 0
         return try {
             val json: String = JsonUtils.json(entities)
             val call: Call = LanQinHttp.post(LanQinApi.UPLOAD_LOG, json)
