@@ -14,7 +14,7 @@ internal abstract class LanQinDatabase : RoomDatabase() {
     companion object {
         fun create(app: Application): LanQinDatabase {
             val name = "LanQin-DB"
-            val clazz = LanQinDatabase::class.java
+            val clazz: Class<LanQinDatabase> = LanQinDatabase::class.java
             return Room.databaseBuilder(app, clazz, name).build()
         }
     }
@@ -23,12 +23,12 @@ internal abstract class LanQinDatabase : RoomDatabase() {
 internal fun RoomDatabase.truncate(vararg tables: String) {
     try {
         val ssd: SupportSQLiteDatabase = this.openHelper.writableDatabase
-        tables.iterator().forEach { table ->
+        tables.iterator().forEach { table: String ->
             //清除数据
             val deleteSql = "DELETE FROM $table;"
             ssd.execSQL(deleteSql)
             //重置自增索引
-            val resetSql = "UPDATE sqlite_sequence SET seq = 0 WHERE name = '$table';"
+            val resetSql = "DELETE FROM sqlite_sequence WHERE name = '$table';"
             ssd.execSQL(resetSql)
         }
     } catch (e: Exception) {

@@ -81,7 +81,7 @@ object LanQin {
             //移除过期日志
             val expireOuts: List<LogTextEntity> =
                 logs.filter { log: LogTextEntity -> currentMills - log.time >= maxExpire }
-            dao.insertAll(expireOuts)
+            if (expireOuts.isNotEmpty()) dao.deleteAll(expireOuts)
             //上送日志
             val expireIns: List<LogTextEntity> =
                 logs.filter { log: LogTextEntity -> currentMills - log.time < maxExpire }
@@ -89,8 +89,8 @@ object LanQin {
                 val json: String = log.content
                 return@map JsonUtils.parse<LanQinEntity>(json)
             }.filterNotNull()
-            if (CloudRepos.save(entities) <= 0) return
-            dao.deleteAll(logs)
+            if (entities.isEmpty() || CloudRepos.save(entities) <= 0) return
+            dao.deleteAll(expireIns)
         } catch (e: Exception) {
             e.printStackTrace()
         }
