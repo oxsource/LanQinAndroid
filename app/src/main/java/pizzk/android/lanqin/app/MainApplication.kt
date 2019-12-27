@@ -10,7 +10,7 @@ class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         doAsync {
-            val host = "http://192.168.0.104:8055"
+            val host = "http://192.168.4.124:8055"
             val config = LanQin.Config("001", "alpha", host, 7, BuildConfig.DEBUG)
             LanQin.init(this@MainApplication, config)
             LanQin.uploads()
