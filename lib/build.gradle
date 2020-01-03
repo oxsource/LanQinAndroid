@@ -38,9 +38,11 @@ dependencies {
     implementation "android.arch.persistence.room:runtime:$jet_pack"
     kapt "android.arch.persistence.room:compiler:$jet_pack"
     /**网络请求库*/
-    implementation 'com.squareup.okhttp3:okhttp:3.14.1'
+    def ok_http = '3.11.0'
+    implementation "com.squareup.okhttp3:okhttp:$ok_http"
     /**Anko*/
-    implementation "org.jetbrains.anko:anko-commons:0.10.5"
+    def anko = '0.10.5'
+    implementation "org.jetbrains.anko:anko-commons:$anko"
     /**Json解析*/
     def jackson = '2.9.8'
     implementation "com.fasterxml.jackson.core:jackson-core:$jackson"
