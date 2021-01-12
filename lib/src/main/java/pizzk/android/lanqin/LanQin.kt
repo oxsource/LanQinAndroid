@@ -1,6 +1,7 @@
 package pizzk.android.lanqin
 
 import android.app.Application
+import org.jetbrains.anko.doAsync
 import pizzk.android.lanqin.db.LanQinDatabase
 import pizzk.android.lanqin.db.LogDao
 import pizzk.android.lanqin.db.LogTextEntity
@@ -63,6 +64,10 @@ object LanQin {
             e.printStackTrace()
         }
         return false
+    }
+
+    fun uploadAsync(entity: LanQinEntity) {
+        doAsync { upload(entity) }
     }
 
     /**
