@@ -4,7 +4,6 @@ import android.app.Application
 import pizzk.android.lanqin.LanQin
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.lang.Exception
 import java.util.*
 
 /**
@@ -92,7 +91,7 @@ data class LanQinEntity(
         const val LEVEL_ERROR = 2
         const val LEVEL_CRASH = 3
 
-        fun stackTrace(e: Exception): String {
+        fun stackTrace(e: Throwable): String {
             val sw = StringWriter()
             val pw = PrintWriter(sw)
             e.printStackTrace(pw)

@@ -18,13 +18,13 @@ import java.util.*
  */
 object LanQin {
     data class Config(
-            val appId: String,
-            val channel: String,
-            /**上送服务器地址，不合规的地址将不进行上送*/
-            val host: String,
-            /**最大缓存时间*/
-            val expireDays: Int,
-            var debug: Boolean = true
+        val appId: String,
+        val channel: String,
+        /**上送服务器地址，不合规的地址将不进行上送*/
+        val host: String,
+        /**最大缓存时间*/
+        val expireDays: Int,
+        var debug: Boolean = true
     )
 
     private lateinit var config: Config
@@ -77,7 +77,9 @@ object LanQin {
             val maxExpire = 7 * 24 * 60 * 60
             //移除过期日志
             val expireOuts = logs.filter { log -> currentMills - log.time >= maxExpire }
-            dao.insertAll(expireOuts)
+            if (expireOuts.isNotEmpty()) {
+                dao.deleteAll(expireOuts)
+            }
             //上送日志
             val expireIns = logs.filter { log -> currentMills - log.time < maxExpire }
             val entities: List<LanQinEntity> = expireIns.map { log ->
