@@ -1,6 +1,9 @@
 package pizzk.android.lanqin
 
 import android.app.Application
+import android.os.Looper
+import android.widget.Toast
+import org.jetbrains.anko.doAsync
 import pizzk.android.lanqin.db.LanQinDatabase
 import pizzk.android.lanqin.db.LogTextEntity
 import pizzk.android.lanqin.entity.LanQinEntity
@@ -9,6 +12,11 @@ import pizzk.android.lanqin.repos.CloudRepos
 import pizzk.android.lanqin.repos.LocalRepos
 import pizzk.android.lanqin.utils.HashUtils
 import java.util.*
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import android.os.Process
+import pizzk.android.lanqin.utils.Logger
+import kotlin.system.exitProcess
 
 /**
  * 蓝芩APP性能及BUG采集SDK
@@ -22,7 +30,15 @@ object LanQin {
         /**最大缓存时间*/
         val expireDays: Int,
         var debug: Boolean = true
-    )
+    ) {
+        constructor(channel: String, debug: Boolean) : this(
+            appId = "",
+            channel = channel,
+            host = "",
+            expireDays = 1,
+            debug = debug
+        )
+    }
 
     private lateinit var config: Config
     private lateinit var app: Application
@@ -71,8 +87,12 @@ object LanQin {
             e.printStackTrace()
             return false
         }
-        val saved: Boolean = database { LocalRepos.save(logs, it) > 0 } ?: false
-        if (CloudRepos.save(es) <= 0 || !saved) return false
+        if (config().host.isEmpty()) {
+            Logger.shadow(es)
+            return true
+        }
+        val cached: Boolean = database { LocalRepos.save(logs, it) > 0 } ?: false
+        if (CloudRepos.save(es) <= 0 || !cached) return false
         database { it.log().deleteAll(logs) }
         return true
     }
@@ -92,6 +112,7 @@ object LanQin {
         val bad: List<LogTextEntity> = group[true] ?: emptyList()
         if (bad.isNotEmpty()) database { it.log().deleteAll(bad) }
         //上传有效日志
+        if (config().host.isEmpty()) return
         val good: List<LogTextEntity> = group[false] ?: emptyList()
         val es: List<LanQinEntity> = good.mapNotNull { JsonUtils.parse<LanQinEntity>(it.content) }
         if (CloudRepos.save(es) <= 0) return
@@ -111,5 +132,33 @@ object LanQin {
      */
     fun cleanLogs() {
         LanQinDatabase.truncate(app(), LogTextEntity.TABLE)
+        Logger.truncate()
+    }
+
+    //异步任务
+    fun asyncTask(block: () -> Unit) {
+        doAsync { block() }
+    }
+
+    //包装配置LanQin CrashHandler
+    fun withCrashHandler(seconds: Long = 5) {
+        val handler: Thread.UncaughtExceptionHandler? = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            val exp: Throwable = throwable ?: Exception("UncaughtException")
+            val latch = CountDownLatch(1)
+            doAsync {
+                upload(LanQinEntity.throwable(exp))
+                latch.countDown()
+            }
+            Thread {
+                Looper.prepare()
+                Toast.makeText(app, R.string.lan_qin_app_crash_hint, Toast.LENGTH_LONG).show()
+                Looper.loop()
+            }.start()
+            latch.await(seconds, TimeUnit.SECONDS)
+            handler?.uncaughtException(thread, exp)
+            Process.killProcess(Process.myPid())
+            exitProcess(status = -1)
+        }
     }
 }

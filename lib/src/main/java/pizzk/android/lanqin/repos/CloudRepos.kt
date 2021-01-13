@@ -7,6 +7,7 @@ import pizzk.android.lanqin.api.LanQinHttp
 import pizzk.android.lanqin.api.LanQinHttpResult
 import pizzk.android.lanqin.entity.LanQinEntity
 import pizzk.android.lanqin.utils.JsonUtils
+import pizzk.android.lanqin.utils.Logger
 import java.lang.Exception
 
 /**云存储仓库*/
@@ -16,11 +17,13 @@ internal object CloudRepos {
         if (entities.isEmpty()) return 0
         return try {
             val json: String = JsonUtils.json(entities)
+            Logger.e("cloud save: $json")
             val call: Call = LanQinHttp.post(LanQinApi.UPLOAD_LOG, json)
             val response: Response = call.execute()
             val result: LanQinHttpResult = LanQinHttp.results(response)
             if (result.successful()) entities.size else 0
         } catch (e: Exception) {
+            Logger.e("cloud save exp: ${e.message}")
             0
         }
     }

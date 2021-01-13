@@ -8,9 +8,10 @@ import java.util.concurrent.TimeUnit
 /**蓝芩Http客户端*/
 internal object LanQinHttp {
     /**超时设置*/
-    private const val READ_TS = 15L
-    private const val WRITE_TS = 15L
-    private const val CONN_TS = 15L
+    private const val READ_TS = 5L
+    private const val WRITE_TS = 5L
+    private const val CONN_TS = 5L
+
     /**JSON媒体类型*/
     private const val JSON_MEDIA = "application/json"
 

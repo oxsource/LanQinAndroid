@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">lib</string>
+    <string name="lan_qin_app_crash_hint">About to quit by error.</string>
 </resources>
