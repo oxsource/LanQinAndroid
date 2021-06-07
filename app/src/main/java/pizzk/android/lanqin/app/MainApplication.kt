@@ -8,7 +8,6 @@ class MainApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-//        val config = LanQin.Config("001", "alpha", "", 7, BuildConfig.DEBUG)
         val config = LanQin.Config("alpha", BuildConfig.DEBUG)
         LanQin.init(this@MainApplication, config)
         LanQin.withCrashHandler(seconds = 5)

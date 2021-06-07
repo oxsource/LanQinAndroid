@@ -15,6 +15,11 @@ object Logger {
         Log.e(TAG, s)
     }
 
+    internal fun d(s: String) {
+        if (!LanQin.config().debug) return
+        Log.d(TAG, s)
+    }
+
     private fun write(path: String, s: String, append: Boolean) {
         try {
             val cache = LanQin.app().externalCacheDir ?: return

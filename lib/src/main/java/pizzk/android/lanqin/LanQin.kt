@@ -15,7 +15,14 @@ import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import android.os.Process
+import pizzk.android.lanqin.shell.AdbShell
+import pizzk.android.lanqin.utils.IoUtils
 import pizzk.android.lanqin.utils.Logger
+import java.io.BufferedInputStream
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import kotlin.system.exitProcess
 
 /**
@@ -160,5 +167,55 @@ object LanQin {
             Process.killProcess(Process.myPid())
             exitProcess(status = -1)
         }
+    }
+
+    //清除logcat日志
+    fun cleanLogcat() {
+        AdbShell.nimble("logcat -c")
+    }
+
+    //自定义收集logcat日志操作
+    fun dumpLogcat(block: (File) -> Unit) {
+        val logSuffix = ".log"
+        val file: File = kotlin.runCatching {
+            val context = app().applicationContext
+            val cacheDir: File = context.externalCacheDir ?: context.cacheDir
+            val sdf = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.CHINA)
+            //dump log to file
+            val time = sdf.format(Date())
+            val features = StringBuffer()
+            features.append(android.os.Build.MODEL.replace("\\s".toRegex(), ""))
+            features.append("-")
+            features.append(android.os.Build.VERSION.SDK_INT)
+            val file = File(cacheDir, "LanQin_${time}_$features${logSuffix}")
+            AdbShell.nimble("logcat -df ${file.absolutePath}")
+            if (!file.exists()) return@runCatching null
+            if (file.length() > 0) return@runCatching file
+            file.delete()
+            return@runCatching null
+        }.getOrNull() ?: return Logger.e("dump logcat file is not exist or length is 0.")
+        //log file zip
+        val zip: File? = kotlin.runCatching {
+            val path = "${file.absolutePath.replace(logSuffix, "")}.zip"
+            val zipFile = File(path)
+            ZipOutputStream(zipFile.outputStream()).use { outs ->
+                val entry = ZipEntry(file.name)
+                val ins: BufferedInputStream = file.inputStream().buffered()
+                outs.putNextEntry(entry)
+                IoUtils.write(ins, outs)
+                outs.closeEntry()
+            }
+            return@runCatching zipFile
+        }.getOrNull()
+        file.delete()
+        zip ?: return
+        //consume action
+        kotlin.runCatching { block(zip) }
+        if (zip.exists()) zip.delete()
+    }
+
+    //收集logcat日志并上报到服务端
+    fun dumpLogcat() {
+        dumpLogcat { CloudRepos.save(it) }
     }
 }
